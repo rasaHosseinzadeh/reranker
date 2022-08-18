@@ -1001,6 +1001,10 @@ class GenerationConfig(FairseqDataclass):
         default=None,
         metadata={"help": "EOS token"},
     )
+    bleu_rerank: bool = field(
+        default=False,
+        metadata={"help": "Sort beam by bleu"},
+    )
 
 
 @dataclass

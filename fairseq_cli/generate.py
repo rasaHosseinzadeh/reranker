@@ -19,6 +19,8 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
+import sacrebleu
+
 from fairseq import checkpoint_utils, options, scoring, tasks, utils
 from fairseq.dataclass.utils import convert_namespace_to_omegaconf
 from fairseq.logging import progress_bar
@@ -259,6 +261,20 @@ def _main(cfg: DictConfig, output_file):
                     print("T-{}\t{}".format(sample_id, target_str), file=output_file)
 
             # Process top predictions
+            if cfg.generation.bleu_rerank:
+                for h in hypos[i]:
+                    _, h_str, _ = utils.post_process_prediction(
+                        hypo_tokens=h["tokens"].int().cpu(),
+                        src_str=src_str,
+                        alignment=h["alignment"],
+                        align_dict=align_dict,
+                        tgt_dict=tgt_dict,
+                        remove_bpe=cfg.common_eval.post_process,
+                        extra_symbols_to_ignore=get_symbols_to_strip_from_output(generator),
+                    )
+                    h_str = decode_fn(h_str)
+                    h['score']= sacrebleu.sentence_bleu(h_str, [target_str], tokenize="none").score
+                hypos[i] = sorted(hypos[i], key=(lambda y: y['score']), reverse=True)
             for j, hypo in enumerate(hypos[i][: cfg.generation.nbest]):
                 hypo_tokens, hypo_str, alignment = utils.post_process_prediction(
                     hypo_tokens=hypo["tokens"].int().cpu(),
