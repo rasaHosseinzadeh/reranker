@@ -141,3 +141,4 @@ multirun
 outputs
 data-bin
 *.pt
+results/*

@@ -53,6 +53,8 @@ class Reranker(TransformerModel):
             help='Teacher ema decay.')
         parser.add_argument('--teacher-beam', default=5, type=int,
             help='Number of samples to be reranked by teacher.')
+        parser.add_argument('--valid-per-epoch', default=0, type=int,
+            help='Number of validation done per epoch.')
 
 
     def bleu_rerank(self, gen_toks, tgt_tokens):

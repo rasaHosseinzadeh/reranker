@@ -24,7 +24,6 @@ from .transformer_legacy import (
     transformer_wmt_en_de_big_t2t,
 )
 from .transformer_base import TransformerModelBase, Embedding
-from .reranker import Reranker
 
 
 
@@ -49,5 +48,4 @@ __all__ = [
     "DEFAULT_MAX_SOURCE_POSITIONS",
     "DEFAULT_MAX_TARGET_POSITIONS",
     "DEFAULT_MIN_PARAMS_TO_WRAP",
-    "Reranker",
 ]

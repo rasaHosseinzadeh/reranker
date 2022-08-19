@@ -11,7 +11,7 @@ fairseq-train \
     --lr 5e-4 --lr-scheduler inverse_sqrt --warmup-updates 4000 \
     --dropout 0.3 --weight-decay 0.0001 \
     --criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
-    --max-tokens 4096 \
+    --max-tokens 512 \
     --eval-bleu \
     --eval-bleu-args '{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}' \
     --eval-bleu-detok moses \
@@ -25,4 +25,5 @@ fairseq-train \
     --validate-interval 1 \
     --num-workers 10 \
     --no-epoch-checkpoints \
-    --keep-best-checkpoints 10
+    --keep-best-checkpoints 10\
+    --valid-per-epoch 10
