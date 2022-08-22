@@ -24,10 +24,10 @@ class Reranker(TransformerModel):
         dummy_task = DummyTask(source_dictionary=encoder.dictionary, target_dictionary=decoder.dictionary)
         self.teacher = [TransformerModel.build_model(cfg, dummy_task).cuda().half()]
         self.teacher[0].load_state_dict(torch.load(cfg.teacher_path)['model'])
-        teacher_ema_config=EMAModuleConfig()
-        teacher_ema_config.ema_decay= cfg.teacher_ema_decay
-        teacher_ema_config.ema_fp32=True
-        self.teacher_ema=EMAModule(self.teacher[0], teacher_ema_config, device='cuda')
+        #teacher_ema_config=EMAModuleConfig()
+        #teacher_ema_config.ema_decay= cfg.teacher_ema_decay
+        #teacher_ema_config.ema_fp32=True
+        #self.teacher_ema=EMAModule(self.teacher[0], teacher_ema_config, device='cuda')
         self.generator = SequenceGenerator(
             self.teacher,
             self.decoder.dictionary,
@@ -74,16 +74,17 @@ class Reranker(TransformerModel):
         tgt_tokens,
         return_all_hiddens: bool = True,
     ):
+        #if self.training:
+        #    self.teacher_ema.step(self)
+        #    self.teacher[0]=self.teacher_ema.reverse(self.teacher[0])
+        self.teacher[0].eval()   
+        gen_toks = tgt_tokens     
         if self.training:
-            self.teacher_ema.step(self)
-            self.teacher[0]=self.teacher_ema.reverse(self.teacher[0])
-        self.teacher[0].eval()
-        self.eval()
-        
-        with torch.no_grad():
-            sample = {'net_input': {'src_tokens': src_tokens, 'src_lengths': src_lengths}, "target": tgt_tokens}
-            gen_toks = self.generator.generate(self.teacher, sample)
-            gen_toks = self.bleu_rerank(gen_toks, tgt_tokens)
+            with torch.no_grad():
+                sample = {'net_input': {'src_tokens': src_tokens, 'src_lengths': src_lengths}, "target": tgt_tokens}
+                gen_toks = self.generator.generate(self.teacher, sample)
+                gen_toks = self.bleu_rerank(gen_toks, tgt_tokens)
+        #self.eval()
         return super().forward(src_tokens, src_lengths, gen_toks,), gen_toks
 
 @register_model_architecture("reranker", "reranker")

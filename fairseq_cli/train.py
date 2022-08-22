@@ -328,7 +328,7 @@ def train(
 
         end_of_epoch = not itr.has_next()
         if getattr(cfg.model, 'valid_per_epoch', 0) !=0:
-           end_of_epoch = end_of_epoch or (i)%(len(itr)//cfg.model.valid_per_epoch)==0
+           end_of_epoch = end_of_epoch or (i)%(len(itr)//cfg.model.valid_per_epoch) == (len(itr)//cfg.model.valid_per_epoch - 1)
 
         valid_losses, should_stop = validate_and_save(
             cfg, trainer, task, epoch_itr, valid_subsets, end_of_epoch
