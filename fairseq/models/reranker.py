@@ -85,8 +85,12 @@ class Reranker(TransformerModel):
                 sample = {'net_input': {'src_tokens': src_tokens, 'src_lengths': src_lengths}, "target": tgt_tokens}
                 gen_toks = self.generator[0].generate(self.teacher, sample)
                 gen_toks = self.bleu_rerank(gen_toks, tgt_tokens)
+                prev_output_tokens = gen_toks.clone()
+                prev_output_tokens[:,1:] = gen_toks[:,:-1]
+                prev_output_tokens[prev_output_tokens==self.decoder.dictionary.eos()] = self.decoder.dictionary.pad()
+                prev_output_tokens[:,0] = self.decoder.dictionary.eos()
         #self.eval()
-        return super().forward(src_tokens, src_lengths, gen_toks,), gen_toks
+        return super().forward(src_tokens, src_lengths, prev_output_tokens, return_all_hiddens), gen_toks, prev_output_tokens
 
 @register_model_architecture("reranker", "reranker")
 def reranker_base_architecture(args):
