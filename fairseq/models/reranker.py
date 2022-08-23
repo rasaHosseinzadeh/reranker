@@ -6,7 +6,7 @@ import sacrebleu
 from fairseq import search, utils
 from fairseq.models import register_model, register_model_architecture
 from fairseq.modules.ema_module import EMAModule, EMAModuleConfig
-from fairseq.sequence_generator import SequenceGenerator
+import fairseq.sequence_generator as sc
 from torch.nn.utils.rnn import pad_sequence
 
 
@@ -28,12 +28,12 @@ class Reranker(TransformerModel):
         #teacher_ema_config.ema_decay= cfg.teacher_ema_decay
         #teacher_ema_config.ema_fp32=True
         #self.teacher_ema=EMAModule(self.teacher[0], teacher_ema_config, device='cuda')
-        self.generator = SequenceGenerator(
+        self.generator = [sc.SequenceGenerator(
             self.teacher,
             self.decoder.dictionary,
             beam_size=getattr(cfg, "teacher_beam", 5),
-            max_len_a=getattr(cfg, "max_len_a", 0),
-            max_len_b=getattr(cfg, "max_len_b", 200),
+            max_len_a=getattr(cfg, "max_len_a", 1.3),
+            max_len_b=getattr(cfg, "max_len_b", 10),
             min_len=getattr(cfg, "min_len", 1),
             normalize_scores=(not getattr(cfg, "unnormalized", False)),
             len_penalty=getattr(cfg, "lenpen", 1),
@@ -42,7 +42,8 @@ class Reranker(TransformerModel):
             match_source_len=getattr(cfg, "match_source_len", False),
             no_repeat_ngram_size=getattr(cfg, "no_repeat_ngram_size", 0),
             search_strategy=search.BeamSearch(decoder.dictionary),
-        )
+        )]
+        
 
     @staticmethod
     def add_args(parser):
@@ -82,7 +83,7 @@ class Reranker(TransformerModel):
         if self.training:
             with torch.no_grad():
                 sample = {'net_input': {'src_tokens': src_tokens, 'src_lengths': src_lengths}, "target": tgt_tokens}
-                gen_toks = self.generator.generate(self.teacher, sample)
+                gen_toks = self.generator[0].generate(self.teacher, sample)
                 gen_toks = self.bleu_rerank(gen_toks, tgt_tokens)
         #self.eval()
         return super().forward(src_tokens, src_lengths, gen_toks,), gen_toks
