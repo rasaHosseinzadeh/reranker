@@ -32,8 +32,8 @@ class Reranker(TransformerModel):
             self.teacher,
             self.decoder.dictionary,
             beam_size=getattr(cfg, "teacher_beam", 5),
-            max_len_a=getattr(cfg, "max_len_a", 1.3),
-            max_len_b=getattr(cfg, "max_len_b", 10),
+            max_len_a=getattr(cfg, "teacher_max_len_a", 1.2),
+            max_len_b=getattr(cfg, "teacher_max_len_b", 10),
             min_len=getattr(cfg, "min_len", 1),
             normalize_scores=(not getattr(cfg, "unnormalized", False)),
             len_penalty=getattr(cfg, "lenpen", 1),
@@ -44,7 +44,6 @@ class Reranker(TransformerModel):
             search_strategy=search.BeamSearch(decoder.dictionary),
         )]
         
-
     @staticmethod
     def add_args(parser):
         super(Reranker, Reranker).add_args(parser)
@@ -52,6 +51,10 @@ class Reranker(TransformerModel):
             help='path to the trained teacher for distillation.')
         parser.add_argument('--teacher-ema-decay', default=.9997, type=float,
             help='Teacher ema decay.')
+        parser.add_argument('--teacher-max-len-a', default=1.2, type=float,
+            help='Teacher length scale from src to ref.')
+        parser.add_argument('--teacher-max-len-b', default=10, type=int,
+            help='Teacher length bias from src to ref.')
         parser.add_argument('--teacher-beam', default=5, type=int,
             help='Number of samples to be reranked by teacher.')
         parser.add_argument('--valid-per-epoch', default=0, type=int,

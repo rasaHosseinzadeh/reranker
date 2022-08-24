@@ -8,13 +8,13 @@ fairseq-train \
     --task translation \
     --share-decoder-input-output-embed \
     --optimizer adam --adam-betas '(0.9, 0.98)' --clip-norm 0.0 \
-    --lr 0.1e-5 --lr-scheduler inverse_sqrt --warmup-updates 1 \
-    --dropout 0.3 --weight-decay 0.01 \
+    --lr 5e-4 --lr-scheduler inverse_sqrt --warmup-updates 1 \
+    --dropout 0.3 --weight-decay 0.0001 \
     --criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
     --max-tokens 512 \
     --max-tokens-valid 512 \
     --eval-bleu \
-    --eval-bleu-args '{"beam": 1, "max_len_a": 1.2, "max_len_b": 10}' \
+    --eval-bleu-args '{"beam": 1, "max_len_a": 1.5, "max_len_b": 10}' \
     --eval-bleu-detok moses \
     --eval-bleu-remove-bpe \
     --eval-bleu-print-samples \
@@ -22,13 +22,15 @@ fairseq-train \
     --save-dir ./results/reranked_wmt16_roen \
     --log-file ./results/reranked_wmt16_roen/log.txt \
     --tensorboard-logdir ./results/reranked_wmt16_roen/ \
-    --patience 50 \
+    --patience 11 \
     --validate-interval 1 \
-    --num-workers 40 \
+    --num-workers 20 \
     --no-epoch-checkpoints \
     --keep-best-checkpoints 10\
     --valid-per-epoch 10 \
     --fixed-validation-seed  7 \
     --teacher-ema-decay 1. \
-    --teacher-beam 20 \
+    --teacher-max-len-a 1.5 \
+    --teacher-max-len-b 10 \
+    --teacher-beam 15 \
     --fp16
