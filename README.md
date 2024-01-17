@@ -1,3 +1,6 @@
+Add rerank distillation to fairseq tranlatoin. Rerank non-autoregressive model's output and make the best one (based on blue) more likely.
+Original Repo:
+
 <p align="center">
   <img src="docs/fairseq_logo.png" width="150">
   <br />
